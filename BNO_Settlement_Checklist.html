@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>BNO 永居（ILR）申請助手 2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{background:#0b1d2e;font-family:Georgia,"Noto Serif TC",serif;color:#f0ece4;min-height:100vh;padding-bottom:96px}
+button{font-family:inherit;cursor:pointer;border:none;touch-action:manipulation}
+input,select{font-family:inherit;outline:none}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.8);width:24px;height:24px;cursor:pointer}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(201,151,58,.35);border-radius:99px}
+@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.screen{display:none}.screen.active{display:block;animation:fadeIn .22s ease}
+.toast{position:fixed;bottom:108px;left:50%;transform:translateX(-50%);background:rgba(8,20,34,.97);color:#fff;border-radius:30px;padding:12px 24px;font-size:15px;font-weight:bold;white-space:nowrap;border:1.5px solid rgba(201,151,58,.5);box-shadow:0 6px 30px rgba(0,0,0,.5);z-index:9999;animation:slideUp .3s ease,fadeOut .4s ease 2s forwards;pointer-events:none}
+.nav-btn{flex:1;padding:12px 8px;border-radius:16px;border:none;font-size:13px;transition:all .2s;text-align:center;line-height:1.5;background:rgba(255,255,255,.07);color:#c8bfd8}
+.nav-btn.on{background:#c9973a;color:#1a0e00;font-weight:bold}
+.field{width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.18);border-radius:13px;padding:14px 16px;color:#f0ece4;font-size:16px;color-scheme:dark}
+.field:focus{border-color:rgba(201,151,58,.7)}
+.pill-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.pill{padding:10px 16px;border-radius:22px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:#c8bfd8;font-size:14px;cursor:pointer;transition:all .2s;font-family:inherit}
+.pill.on{background:#c9973a;border-color:#c9973a;color:#1a0e00;font-weight:bold}
+.row{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);min-height:58px;transition:background .15s}
+.row:last-child{border-bottom:none}
+.row:active{background:rgba(255,255,255,.03)}
+.chkbox{width:30px;height:30px;border-radius:9px;flex-shrink:0;margin-top:1px;border:2.5px solid rgba(255,255,255,.28);background:transparent;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.chkbox.on{background:#c9973a;border-color:#c9973a}
+.lbl{font-size:15px;line-height:1.65;flex:1;transition:all .2s}
+.lbl.done{color:#a89fbc;text-decoration:line-through}
+.sec-card{border-radius:18px;margin-bottom:14px;overflow:hidden;transition:border-color .3s}
+.prof-card{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:15px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;transition:all .2s}
+.prof-card.sel{border-color:rgba(201,151,58,.65);background:rgba(201,151,58,.07)}
+.badge{display:inline-block;padding:3px 9px;border-radius:11px;font-size:11px;font-weight:bold}
+.s-sec{background:rgba(255,255,255,.04);border-radius:15px;padding:16px;margin-bottom:12px}
+.s-lbl{font-size:13px;color:#a89fbc;margin-bottom:7px;display:block}
+.step-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .3s}
+.step-dot.on{background:#c9973a;width:20px;border-radius:4px}
+.box-warn{background:rgba(224,92,92,.09);border:1px solid rgba(224,92,92,.28);border-radius:12px;padding:12px 14px;font-size:13px;color:#f0c0c0;line-height:1.7}
+.box-info{background:rgba(76,175,122,.08);border:1px solid rgba(76,175,122,.24);border-radius:12px;padding:12px 14px;font-size:13px;color:#b0e4c8;line-height:1.7}
+.box-gold{background:rgba(201,151,58,.08);border:1px solid rgba(201,151,58,.27);border-radius:12px;padding:12px 14px;font-size:13px;color:#e0c88a;line-height:1.7}
+.prog-bar{height:100%;border-radius:99px;transition:width .5s ease}
+.trip-card{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.09);border-radius:15px;padding:13px 15px;display:flex;align-items:center;gap:13px}
+.del-panel{background:rgba(224,92,92,.12);border:1.5px solid rgba(224,92,92,.38);border-top:none;border-bottom-left-radius:15px;border-bottom-right-radius:15px;padding:12px 15px;display:none;align-items:center;gap:10px}
+.del-panel.show{display:flex}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="hdr" style="border-bottom:2.5px solid #c9973a;padding:22px 20px 14px;text-align:center;background:#0b1d2e">
+  <div style="font-size:10px;letter-spacing:3px;color:#c9973a;margin-bottom:3px;text-transform:uppercase">BNO Visa Holders · ILR 2026</div>
+  <h1 id="pgTitle" style="font-size:19px;font-weight:bold;color:#fff;margin-bottom:3px;line-height:1.3">永居申請助手</h1>
+  <div style="font-size:11px;color:#a89fbc">已持有 BNO 簽証在英居住 → 申請永久居留（ILR）</div>
+</div>
+
+<!-- ══ WELCOME ══ -->
+<div id="screen-welcome" class="screen active">
+<div style="padding:24px 20px 0;text-align:center">
+  <div style="font-size:48px;margin-bottom:14px">🇬🇧</div>
+  <h2 style="font-size:21px;font-weight:bold;color:#fff;margin-bottom:10px;line-height:1.4">BNO 永居（ILR）申請助手</h2>
+  <div class="box-gold" style="text-align:left;margin-bottom:16px">
+    📌 <strong style="color:#c9973a">本工具適用對象：</strong><br>
+    已持有 BNO 簽証並在英國合法居住，現已完成或即將完成5年居英期，準備申請<strong style="color:#c9973a">永久居留（Indefinite Leave to Remain，ILR）</strong>的人士。<br><br>
+    ⚠️ 此清單<strong style="color:#e05c5c">並非</strong>首次申請 BNO 簽証的文件清單。
+  </div>
+
+  <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:17px;margin-bottom:16px;text-align:left">
+    <div style="font-weight:bold;color:#c9973a;margin-bottom:10px;font-size:14px">✅ 此工具包含</div>
+    <div style="font-size:14px;color:#c8bfd8;line-height:1.95">
+      📋 根據您的就業及家庭狀況，自動生成專屬 ILR 文件清單<br>
+      📅 自動計算最早可提交申請日期（五年屆滿前28天）<br>
+      ✈️ 境外天數追蹤及180天預警<br>
+      👥 支援多位家庭成員獨立管理<br>
+      💾 資料自動儲存至裝置，私隱受保護
+    </div>
+  </div>
+
+  <div class="box-warn" style="margin-bottom:16px;text-align:left">
+    ⚖️ <strong style="color:#e05c5c">免責聲明：</strong>本工具僅供參考，不構成法律意見。ILR 申請規定可能隨時更新，提交前請務必向持牌移民律師或顧問確認最新要求。
+  </div>
+
+  <button onclick="startSetup()" style="width:100%;padding:17px;border-radius:15px;background:linear-gradient(135deg,#c9973a,#e8c060);color:#1a0e00;font-size:16px;font-weight:bold;margin-bottom:11px;box-shadow:0 4px 20px rgba(201,151,58,.35)">
+    開始設定我的申請資料 →
+  </button>
+  <button id="skip-btn" onclick="switchScreen('profiles')" style="display:none;width:100%;padding:13px;border-radius:15px;background:rgba(255,255,255,.07);color:#c8bfd8;font-size:14px">返回我的檔案</button>
+</div>
+</div>
+
+<!-- ══ SETUP ══ -->
+<div id="screen-setup" class="screen">
+<div style="padding:14px 20px 0">
+  <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:16px" id="step-dots"></div>
+  <div id="step-title" style="font-size:17px;font-weight:bold;color:#fff;margin-bottom:3px;text-align:center"></div>
+  <div id="step-sub" style="font-size:12px;color:#a89fbc;margin-bottom:16px;text-align:center;line-height:1.5"></div>
+  <div id="step-body"></div>
+  <div style="display:flex;gap:11px;margin-top:6px;padding-bottom:6px">
+    <button id="back-btn" onclick="goBack()" style="display:none;flex:1;padding:14px;border-radius:13px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:#c8bfd8;font-size:15px">← 上一步</button>
+    <button id="next-btn" onclick="goNext()" style="flex:1;padding:14px;border-radius:13px;background:#c9973a;color:#1a0e00;font-size:15px;font-weight:bold">下一步 →</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ PROFILES ══ -->
+<div id="screen-profiles" class="screen">
+<div style="padding:14px 16px 0">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div><div style="font-size:17px;font-weight:bold;color:#fff">我的檔案</div><div style="font-size:12px;color:#a89fbc;margin-top:2px">點擊檔案查看文件清單</div></div>
+    <button onclick="addNewProfile()" style="background:rgba(201,151,58,.13);border:1.5px solid rgba(201,151,58,.38);border-radius:11px;padding:9px 14px;color:#c9973a;font-size:14px;font-weight:bold">＋ 新增</button>
+  </div>
+  <div id="profiles-list"></div>
+  <div class="box-info" style="margin-top:8px">💡 為每位 BNO 簽証持有人建立獨立檔案，清單及離境紀錄分開計算。每位申請人的 ILR 申請費為 <strong>£3,029</strong>。</div>
+</div>
+</div>
+
+<!-- ══ CHECKLIST ══ -->
+<div id="screen-checklist" class="screen">
+  <div id="cl-cd" style="margin:13px 16px 0;border-radius:15px;padding:14px;display:flex;align-items:center;gap:13px"></div>
+  <div style="margin:11px 16px 0">
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:#a89fbc;margin-bottom:6px">
+      <span>備文進度</span>
+      <span id="cl-pct" style="font-weight:bold;font-size:15px;color:#c9973a">0%</span>
+    </div>
+    <div style="height:10px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden">
+      <div id="cl-bar" class="prog-bar" style="width:0%;background:linear-gradient(90deg,#c9973a,#e8c060)"></div>
+    </div>
+    <div id="cl-alldone" style="display:none;text-align:center;margin-top:9px;font-size:14px;color:#4caf7a;font-weight:bold;line-height:1.6">🎉 所有文件已齊備！請聯絡律師安排提交 ILR 申請。</div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin:9px 16px 0">
+    <div id="cl-tag" style="font-size:13px;color:#c9973a;font-weight:bold"></div>
+    <div style="display:flex;gap:7px">
+      <button onclick="editProfile()" style="background:rgba(255,255,255,.07);border-radius:9px;padding:6px 11px;color:#c8bfd8;font-size:12px">✏️ 編輯</button>
+      <button onclick="resetCL()" style="background:rgba(224,92,92,.09);border:1px solid rgba(224,92,92,.24);border-radius:9px;padding:6px 11px;color:#e05c5c;font-size:12px">🔄 重設</button>
+    </div>
+  </div>
+  <div id="cl-body" style="padding:11px 16px 0"></div>
+</div>
+
+<!-- ══ CALCULATOR ══ -->
+<div id="screen-calculator" class="screen">
+<div style="padding:14px 16px 0">
+  <div class="box-gold" style="margin-bottom:13px">
+    <div style="color:#c9973a;font-weight:bold;font-size:14px;margin-bottom:4px">📌 BNO 居英規定（GOV.UK 核實）</div>
+    五年居英期內，任何連續 <strong style="color:#c9973a">12 個月</strong>內，在英境外時間<strong style="color:#c9973a">不可超過 180 天</strong>。超出此限制將影響 ILR 申請資格。
+  </div>
+  <div style="margin-bottom:13px">
+    <div style="font-size:12px;color:#a89fbc;margin-bottom:7px">選擇檔案</div>
+    <div id="calc-tabs"></div>
+  </div>
+  <div id="calc-dates" style="background:rgba(255,255,255,.05);border:1.5px solid rgba(201,151,58,.27);border-radius:15px;padding:14px 16px;margin-bottom:13px"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px">
+    <div id="st-total" style="background:rgba(255,255,255,.05);border-radius:15px;padding:14px 12px;border:1.5px solid rgba(76,175,122,.38)">
+      <div style="font-size:11px;color:#a89fbc;margin-bottom:7px;line-height:1.4">五年總離境天數</div>
+      <div style="font-size:27px;font-weight:bold;color:#4caf7a;line-height:1">0<span style="font-size:13px;margin-left:3px">日</span></div>
+      <div style="font-size:11px;color:#a89fbc;margin-top:7px;line-height:1.4">上限180日・剩餘180日</div>
+      <div style="height:4px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:9px"><div id="bt" style="height:100%;border-radius:99px;background:#4caf7a;width:0%;transition:width .4s"></div></div>
+    </div>
+    <div id="st-roll" style="background:rgba(255,255,255,.05);border-radius:15px;padding:14px 12px;border:1.5px solid rgba(76,175,122,.38)">
+      <div style="font-size:11px;color:#a89fbc;margin-bottom:7px;line-height:1.4">最高滾動12個月</div>
+      <div style="font-size:27px;font-weight:bold;color:#4caf7a;line-height:1">0<span style="font-size:13px;margin-left:3px">日</span></div>
+      <div style="font-size:11px;color:#a89fbc;margin-top:7px;line-height:1.4">剩餘180日</div>
+      <div style="height:4px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:9px"><div id="br" style="height:100%;border-radius:99px;background:#4caf7a;width:0%;transition:width .4s"></div></div>
+    </div>
+  </div>
+  <div id="st-alert" style="display:none;border-radius:12px;padding:12px 14px;margin-bottom:13px;font-size:14px;line-height:1.6"></div>
+  <button id="add-trip-btn" onclick="showTripForm()" style="width:100%;padding:16px;border-radius:14px;border:2px dashed rgba(201,151,58,.5);background:rgba(201,151,58,.05);color:#c9973a;font-size:16px;font-weight:bold;margin-bottom:13px">＋ 新增離境紀錄</button>
+  <div id="trip-form" style="display:none;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,151,58,.38);border-radius:16px;padding:16px;margin-bottom:13px">
+    <div style="font-size:15px;color:#c9973a;font-weight:bold;margin-bottom:14px">✈️ 新增離境紀錄</div>
+    <div style="margin-bottom:12px"><label class="s-lbl">目的地（選填）</label><input id="f-dest" type="text" placeholder="例如：香港、日本、台灣" class="field"/></div>
+    <div style="margin-bottom:12px"><label class="s-lbl">出發日期（離開英國）</label><input id="f-dep" type="date" class="field" min="2021-01-01" max="2035-01-01" oninput="prevTrip()"/></div>
+    <div style="margin-bottom:12px"><label class="s-lbl">返回日期（回到英國）</label><input id="f-ret" type="date" class="field" min="2021-01-01" max="2035-01-01" oninput="prevTrip()"/></div>
+    <div id="f-prev" style="display:none;background:rgba(201,151,58,.12);border-radius:10px;padding:9px 12px;font-size:13px;color:#c9973a;margin-bottom:10px"></div>
+    <div id="f-err" style="display:none;color:#e05c5c;font-size:13px;margin-bottom:10px"></div>
+    <div style="display:flex;gap:10px">
+      <button onclick="saveTrip()" style="flex:1;padding:14px;border-radius:12px;background:#c9973a;color:#1a0e00;font-size:15px;font-weight:bold">新增並儲存</button>
+      <button onclick="cancelTrip()" style="flex:1;padding:14px;border-radius:12px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:#c8bfd8;font-size:15px">取消</button>
+    </div>
+  </div>
+  <div id="trip-list"></div>
+  <div style="height:14px"></div>
+</div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div style="position:fixed;bottom:0;left:0;right:0;background:rgba(6,14,24,.98);border-top:2px solid rgba(201,151,58,.27);display:flex;padding:10px 14px 20px;gap:7px;z-index:100" id="bot-nav">
+  <button class="nav-btn" id="nav-profiles" onclick="switchScreen('profiles')"><div style="font-size:18px;margin-bottom:2px">👥</div>我的檔案</button>
+  <button class="nav-btn" id="nav-checklist" onclick="switchScreen('checklist')"><div style="font-size:18px;margin-bottom:2px">📋</div>文件清單</button>
+  <button class="nav-btn" id="nav-calculator" onclick="switchScreen('calculator')"><div style="font-size:18px;margin-bottom:2px">✈️</div>離境計算</button>
+</div>
+<div id="toasts"></div>
+
+<script>
+/* ══════════════════════════════
+   SETUP STEPS
+══════════════════════════════ */
+const STEPS=[
+  {
+    id:"basic",title:"基本資料",sub:"您的姓名及 BNO 簽証批核日期",
+    html:()=>`
+      <div class="s-sec"><label class="s-lbl">您的姓名</label>
+        <input id="s-name" class="field" type="text" placeholder="例如：陳大文" value="${D.name||''}"/>
+      </div>
+      <div class="s-sec"><label class="s-lbl">BNO 簽証批核日期（首次或最近一次批核）</label>
+        <input id="s-visa" class="field" type="date" min="2021-01-01" max="2030-12-31" value="${D.visaDate||''}" oninput="previewVisa()"/>
+        <div id="vp" style="display:none;margin-top:10px"></div>
+      </div>
+      <div class="box-info">💡 <strong>如何計算5年：</strong>由 BNO 簽証批核日起計算5年連續居英，最早可在五年屆滿前<strong>28天</strong>提交 ILR 申請。</div>`,
+    ok:()=>{const n=V("s-name"),d=V("s-visa");if(!n.trim()){toast("⚠️ 請輸入姓名");return false;}if(!d){toast("⚠️ 請輸入簽証批核日期");return false;}D.name=n.trim();D.visaDate=d;return true;}
+  },
+  {
+    id:"employment",title:"就業狀況",sub:"選擇最符合您在英國目前情況的選項",
+    html:()=>`
+      <div class="s-sec"><label class="s-lbl">在英國的就業狀況</label>
+        <div class="pill-wrap">
+          ${[{k:"employed",l:"受僱（全職/兼職）",e:"💼"},{k:"self_employed",l:"自僱 / 獨立經營",e:"🏪"},
+            {k:"student",l:"學生（BNO簽証下就讀）",e:"🎓"},{k:"retired",l:"已退休",e:"🏖️"},
+            {k:"not_working",l:"暫時未就業",e:"🏠"}]
+          .map(x=>`<button class="pill${D.employment===x.k?" on":""}" onclick="SP('employment','${x.k}',this)">${x.e} ${x.l}</button>`).join("")}
+        </div>
+      </div>
+      <div id="emp-note" class="box-info" style="display:${D.employment?"block":"none"}"><div id="emp-txt"></div></div>`,
+    ok:()=>{if(!D.employment){toast("⚠️ 請選擇就業狀況");return false;}return true;}
+  },
+  {
+    id:"english",title:"英語能力証明",sub:"您符合哪一項英語要求？",
+    html:()=>`
+      <div class="s-sec"><label class="s-lbl">英語能力証明方式（ILR 要求 B1 或以上）</label>
+        <div class="pill-wrap" style="flex-direction:column">
+          ${[{k:"uk_degree",l:"英國認可大學授予的學士或以上學位（英語教學）",e:"🎓"},
+            {k:"other_degree",l:"其他院校以英語教學的學士或以上學位",e:"🏛️"},
+            {k:"ielts",l:"IELTS 或 Trinity GESE 成績達 B1 或以上（Speaking & Listening）",e:"📝"},
+            {k:"age_exempt",l:"65歲或以上（可申請豁免英語測試）",e:"👴"},
+            {k:"disability_exempt",l:"長期病患或殘疾（可申請豁免，需醫療証明）",e:"🏥"}]
+          .map(x=>`<button class="pill${D.english===x.k?" on":""}" onclick="SP('english','${x.k}',this)" style="text-align:left;border-radius:13px">${x.e} ${x.l}</button>`).join("")}
+        </div>
+      </div>
+      <div class="box-info">💡 ILR 申請（BNO 路徑）目前英語要求為 <strong>B1</strong>（Speaking & Listening）。由2026年1月8日起提高至 B2 的規定只適用於 Skilled Worker 等其他簽証類別，並不適用於 BNO 路徑。</div>`,
+    ok:()=>{if(!D.english){toast("⚠️ 請選擇英語能力証明方式");return false;}return true;}
+  },
+  {
+    id:"lifetest",title:"Life in the UK Test",sub:"英國生活知識測試狀況",
+    html:()=>`
+      <div class="s-sec"><label class="s-lbl">Life in the UK Test 狀況</label>
+        <div class="pill-wrap" style="flex-direction:column">
+          ${[{k:"passed",l:"已通過測試，持有合格証書",e:"✅"},
+            {k:"not_yet",l:"尚未應考，需要安排",e:"📖"},
+            {k:"age_exempt",l:"65歲或以上（可申請豁免）",e:"👴"},
+            {k:"disability_exempt",l:"長期病患或殘疾（可申請豁免，需醫療証明）",e:"🏥"}]
+          .map(x=>`<button class="pill${D.lifetest===x.k?" on":""}" onclick="SP('lifetest','${x.k}',this)" style="text-align:left;border-radius:13px">${x.e} ${x.l}</button>`).join("")}
+        </div>
+      </div>
+      <div class="box-gold">💡 Life in the UK Test 考試費為 <strong>£50</strong>，需在網上預約（lifeintheuktests.co.uk）。建議在提交 ILR 申請前至少 <strong>3個月</strong> 安排考試，以防需要重考。</div>`,
+    ok:()=>{if(!D.lifetest){toast("⚠️ 請選擇 Life in the UK Test 狀況");return false;}return true;}
+  },
+  {
+    id:"family",title:"家庭成員",sub:"是否有家庭成員一同申請 ILR？",
+    html:()=>`
+      <div class="s-sec"><label class="s-lbl">申請 ILR 的情況</label>
+        <div class="pill-wrap" style="flex-direction:column">
+          ${[{k:"solo",l:"本人獨立申請",e:"👤"},
+            {k:"with_partner",l:"與配偶/民事伴侶一同申請（各自獨立申請表）",e:"👫"},
+            {k:"with_children",l:"有18歲以下子女一同申請",e:"👨‍👩‍👧"},
+            {k:"with_all",l:"配偶及18歲以下子女一同申請",e:"👨‍👩‍👧‍👦"},
+            {k:"adult_dependent",l:"成年依親（父母/祖父母/兄弟姊妹）一同申請",e:"👴"}]
+          .map(x=>`<button class="pill${D.family===x.k?" on":""}" onclick="SP('family','${x.k}',this)" style="text-align:left;border-radius:13px">${x.e} ${x.l}</button>`).join("")}
+        </div>
+      </div>
+      <div class="box-info">💡 每位家庭成員須各自提交獨立申請，費用 <strong>£3,029</strong>/人。家庭成員可同時或分開提交，毋需同一時間申請。建議在此工具中為每位家庭成員各自建立獨立檔案。</div>`,
+    ok:()=>{if(!D.family){toast("⚠️ 請選擇申請情況");return false;}return true;}
+  }
+];
+
+/* ══ STATE ══ */
+const LSK="bno_ilr_v1";
+function loadS(){try{const v=localStorage.getItem(LSK);return v?JSON.parse(v):{profiles:[],activeP:null,trips:{},scr:"welcome"}}catch{return{profiles:[],activeP:null,trips:{},scr:"welcome"}}}
+function saveS(){try{localStorage.setItem(LSK,JSON.stringify(state))}catch{}}
+let state=loadS();let D={};let step=0;let editId=null;let calcP=null;let pendDel=null;
+
+const V=id=>document.getElementById(id)?.value||"";
+const G=id=>document.getElementById(id);
+const EMP_N={employed:"受僱人士需提供居英証明（含薪金單及銀行月結單）作為在英居住的証明。",self_employed:"自僱人士需提供在英自僱的書面証明，並以商業文件輔助証明居英紀錄。",student:"在 BNO 簽証下就讀的學生，學習時間可計入5年居英期。⚠️ 注意：持學生簽証（Student Visa / Tier 4）期間不計入。",retired:"退休人士主要以銀行月結單、GP 就診紀錄及居英地址文件証明在英居住。",not_working:"主要以銀行月結單、水電賬單、Council Tax 通知等証明在英連續居住。"};
+const EMP_L={employed:"受僱",self_employed:"自僱",student:"學生",retired:"退休",not_working:"未就業"};
+const EMP_C={employed:"#4caf7a",self_employed:"#64b5f6",student:"#c9973a",retired:"#a89fbc",not_working:"#e0a030"};
+
+/* ══ PILLS ══ */
+function SP(k,v,btn){
+  D[k]=v;
+  btn.closest(".pill-wrap").querySelectorAll(".pill").forEach(p=>p.classList.remove("on"));
+  btn.classList.add("on");
+  if(k==="employment"){const n=G("emp-note"),t=G("emp-txt");if(n&&t){n.style.display="block";t.textContent=EMP_N[v]||"";}}
+}
+
+/* ══ SETUP ══ */
+function startSetup(){D={};step=0;editId=null;renderStep();switchScreen("setup");}
+function addNewProfile(){D={};step=0;editId=null;renderStep();switchScreen("setup");}
+function editProfile(){const p=state.profiles.find(x=>x.id===state.activeP);if(!p)return;D={...p};editId=p.id;step=0;renderStep();switchScreen("setup");}
+function renderStep(){
+  const s=STEPS[step];
+  G("step-dots").innerHTML=STEPS.map((_,i)=>`<div class="step-dot${i===step?" on":""}"></div>`).join("");
+  G("step-title").textContent=s.title;G("step-sub").textContent=s.sub;
+  G("step-body").innerHTML=s.html();
+  G("back-btn").style.display=step>0?"block":"none";
+  G("next-btn").textContent=step===STEPS.length-1?"✅ 完成並生成文件清單":"下一步 →";
+  if(s.id==="basic"&&D.visaDate)previewVisa();
+  if(s.id==="employment"&&D.employment){const n=G("emp-note"),t=G("emp-txt");if(n&&t){n.style.display="block";t.textContent=EMP_N[D.employment]||"";}}
+}
+function goNext(){if(!STEPS[step].ok())return;if(step<STEPS.length-1){step++;renderStep();}else finalise();}
+function goBack(){if(step>0){step--;renderStep();}}
+function finalise(){
+  if(editId){const i=state.profiles.findIndex(p=>p.id===editId);if(i>=0)state.profiles[i]={...state.profiles[i],...D,id:editId};state.activeP=editId;}
+  else{const id=Date.now().toString();state.profiles.push({...D,id,checked:{}});state.activeP=id;if(!state.trips)state.trips={};state.trips[id]=[];}
+  saveS();toast("✅ 檔案已儲存，文件清單已生成！");renderProfilesList();renderCL();switchScreen("checklist");
+}
+function previewVisa(){
+  const d=G("s-visa")?.value;D.visaDate=d;const pv=G("vp");if(!pv)return;
+  if(!d){pv.style.display="none";return;}
+  const dt=calcDates(d);pv.style.display="block";
+  pv.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div style="background:rgba(255,255,255,.05);border-radius:11px;padding:11px;text-align:center">
+      <div style="font-size:10px;color:#a89fbc;margin-bottom:3px">五年屆滿日</div>
+      <div style="font-size:13px;font-weight:bold;color:#e8e2f0">${fmtS(toISO(dt.fiveYr))}</div>
+    </div>
+    <div style="background:rgba(201,151,58,.12);border:1px solid rgba(201,151,58,.3);border-radius:11px;padding:11px;text-align:center">
+      <div style="font-size:10px;color:#c9973a;margin-bottom:3px">最早申請 ILR 日</div>
+      <div style="font-size:13px;font-weight:bold;color:#c9973a">${fmtS(toISO(dt.earliest))}</div>
+    </div>
+  </div>`;
+}
+
+/* ══ PROFILES ══ */
+function renderProfilesList(){
+  const c=G("profiles-list");
+  if(!state.profiles.length){c.innerHTML=`<div style="text-align:center;padding:36px 20px;color:#a89fbc;font-size:14px;line-height:1.9"><div style="font-size:36px;margin-bottom:10px">👤</div>尚未建立任何檔案<br><span style="font-size:12px">點擊「新增」開始設定</span></div>`;return;}
+  c.innerHTML=state.profiles.map(p=>{
+    const ak=getKeys(p);const dn=ak.filter(k=>(p.checked||{})[k]).length;
+    const pct=ak.length?Math.round(dn/ak.length*100):0;const dt=calcDates(p.visaDate);
+    const isA=p.id===state.activeP;const ec=EMP_C[p.employment]||"#a89fbc";const el=EMP_L[p.employment]||"";
+    return `<div class="prof-card${isA?" sel":""}" onclick="selProfile('${p.id}')">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+          <div style="font-size:16px;font-weight:bold;color:#fff">${p.name}</div>
+          <span class="badge" style="background:${ec}18;color:${ec};border:1px solid ${ec}35">${el}</span>
+        </div>
+        <div style="font-size:12px;color:#a89fbc;margin-bottom:6px">最早申請日：<strong style="color:#c9973a">${fmtS(toISO(dt.earliest))}</strong></div>
+        <div style="height:4px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;margin-bottom:4px">
+          <div style="height:100%;border-radius:99px;background:${pct===100?"#4caf7a":"#c9973a"};width:${pct}%;transition:width .4s"></div>
+        </div>
+        <div style="font-size:11px;color:#a89fbc">${dn}/${ak.length} 文件已備齊 (${pct}%)</div>
+      </div>
+      <div style="font-size:20px;margin-left:10px;flex-shrink:0">${isA?"✏️":"›"}</div>
+    </div>`;
+  }).join("");
+}
+function selProfile(id){state.activeP=id;saveS();renderProfilesList();renderCL();switchScreen("checklist");}
+
+/* ══ ILR SETTLEMENT CHECKLIST SECTIONS ══
+   Correct documents for people ALREADY IN UK applying for ILR after 5 years
+   Source: GOV.UK, DavidsonMorris, Reiss Edwards, Sunrise Solicitors (2025-2026)
+═══════════════════════════════════════ */
+function getSections(p){
+  const S=[];
+
+  /* 1. BNO Status & Current Immigration Status */
+  S.push({title:"BNO 身份及現時簽証狀態",icon:"🪪",
+    note:"証明您持有 BNO 身份及現時在英國的合法居留狀態",
+    items:[
+      "有效或已過期 BNO 護照（現時護照及5年內所有護照）",
+      "現時有效的旅遊護照（香港特區護照或其他）",
+      "現時 eVisa 截圖 或 BRP 卡正反面影印本（証明現時簽証狀態）",
+      "如已無 BNO 護照：提供姓名及出生日期，Home Office 將自行核查 BNO 身份",
+  ]});
+
+  /* 2. Five years continuous residence - CORE REQUIREMENT */
+  /* Documents must span the ENTIRE 5-year period */
+  const resItems=[
+    "租約合約或物業擁有權文件（覆蓋5年居英期全程）",
+    "Council Tax（地方政府稅）通知書（5年期內各年份）",
+    "銀行月結單（5年期內，建議每年至少3-4份，用以証明在英活動）",
+    "水、電、煤氣或網絡賬單（最近12個月，每月一份）",
+    "GP（家庭醫生）登記確認信或就診紀錄",
+  ];
+  if(p.employment==="employed"){
+    resItems.push("P60 表格（5年期內每個稅務年度各一份）","薪金單（最近6個月）");
+  }
+  if(p.employment==="self_employed"){
+    resItems.push("SA302 自我評稅表（最近2年）");
+  }
+  resItems.push("其他在英居住証明（如：選民登記確認信、NHS 信件、政府來信等）");
+  S.push({title:"五年連續居英証明",icon:"🏠",
+    note:"必須覆蓋整個5年居英期，文件越齊全越好。Home Office 尤其注意有否連續居住空白期",
+    items:resItems});
+
+  /* 3. Travel History - to demonstrate 180-day compliance */
+  S.push({title:"離境旅遊紀錄",icon:"✈️",
+    note:"必須証明在5年居英期內，任何連續12個月內境外天數不超過180天",
+    items:[
+      "5年期內所有護照正本（含出入境印章，如有）",
+      "所有護照影印本（包括已過期護照，顯示全部出入境記錄）",
+      "旅遊記錄自我申報表（Travel History Declaration，列明所有離境日期、目的地及天數）",
+      "如超過180天的特殊情況：相關証明文件（如：嚴重疾病醫療証明、家庭緊急情況証明等）",
+  ]});
+
+  /* 4. Employment documents (to corroborate residence, NOT as separate financial requirement) */
+  if(p.employment==="employed"){
+    S.push({title:"受僱証明文件",icon:"💼",
+      note:"用以輔助証明在英連續居住及生活，並非需要証明財務能力",
+      items:[
+        "現時僱傭合約（列明職位、薪金及入職日期）",
+        "現任僱主確認信（公司信頭，確認在職狀況及起始日期）",
+        "最近6個月薪金單（Payslips）",
+        "最近3個月銀行月結單（顯示薪金存入紀錄）",
+        "P60 表格（最近已完成的稅務年度）",
+        "HMRC 稅務往來信件（如有）",
+    ]});
+  }
+  if(p.employment==="self_employed"){
+    S.push({title:"自僱証明文件",icon:"🏪",
+      note:"用以証明在英從事合法業務活動及在英居住",
+      items:[
+        "HMRC 唯一稅號（UTR）確認文件",
+        "最近2年 SA302 自我評稅表（Self Assessment Tax Return）",
+        "會計師出具的商業賬目報告（Tax Year Accounts）",
+        "最近6個月商業銀行月結單",
+        "商業登記証或公司文件（如適用）",
+        "商業合約、發票或客戶信件（証明持續業務活動）",
+    ]});
+  }
+  if(p.employment==="student"){
+    S.push({title:"學籍証明文件",icon:"🎓",
+      note:"⚠️ 重要：在 BNO 簽証下就讀的時間可計入5年；但持學生簽証（Student Visa / Tier 4）的時間不可計入",
+      items:[
+        "就讀英國院校的在學/在讀確認信（如仍在讀）",
+        "畢業証書（如已畢業，英語教學課程的畢業証書同時可作英語能力証明）",
+        "歷年學籍証明或成績單（輔助証明居英紀錄）",
+    ]});
+  }
+  if(p.employment==="retired"){
+    S.push({title:"退休狀態証明",icon:"🏖️",
+      note:"主要以銀行月結單及地址文件証明在英居住，毋需証明財務能力",
+      items:[
+        "退休金、公積金或強積金（MPF）提取証明（如有）",
+        "銀行月結單（証明在英日常生活開支）",
+    ]});
+  }
+  if(p.employment==="not_working"){
+    S.push({title:"在英居住輔助証明",icon:"🏠",
+      note:"需以日常生活文件輔助証明連續居英",
+      items:[
+        "銀行月結單（顯示在英日常開支，如超市、交通等）",
+        "NHS 就診紀錄或處方紀錄",
+    ]});
+  }
+
+  /* 5. English Language */
+  const engItems=[];
+  if(p.english==="uk_degree"){
+    engItems.push("英國認可大學頒授的學士或以上學位証書（英語教學）","如課程非全英語教學，需提供院校確認信証明英語教學比例");
+  } else if(p.english==="other_degree"){
+    engItems.push("院校頒授的學士或以上學位証書","院校書面確認以英語教學的証明信");
+  } else if(p.english==="ielts"){
+    engItems.push(
+      "IELTS Academic 或 General Training 成績表（Speaking 及 Listening 均達 B1 或以上）",
+      "或 Trinity GESE Grade 5 或以上合格証書",
+      "⚠️ 注意：測試成績必須在提交 ILR 申請前2年內取得，過期成績將不被接受"
+    );
+  } else if(p.english==="age_exempt"){
+    engItems.push("出生証明書（証明年齡65歲或以上，用於申請豁免英語測試）");
+  } else if(p.english==="disability_exempt"){
+    engItems.push("醫生或專科醫生出具的長期病患/殘疾証明書","相關醫療報告（支持豁免申請）");
+  }
+  S.push({title:"英語能力証明",icon:"🗣️",
+    note:p.english==="age_exempt"?"65歲或以上可申請豁免英語測試":p.english==="disability_exempt"?"長期病患或殘疾可申請醫療豁免":p.english==="uk_degree"?"英國認可大學英語學位可豁免，毋需另行提交測試成績":"BNO ILR 路徑目前英語要求為 B1（Speaking & Listening）",
+    items:engItems});
+
+  /* 6. Life in UK Test */
+  const lifeItems=[];
+  if(p.lifetest==="passed"){
+    lifeItems.push("Life in the UK Test 合格証書正本","確認証書上的姓名與護照完全一致");
+  } else if(p.lifetest==="not_yet"){
+    lifeItems.push(
+      "預約 Life in the UK Test（lifeintheuktests.co.uk，費用 £50）",
+      "⚠️ 必須在提交 ILR 申請前通過，建議至少3個月前安排",
+      "通過後：Life in the UK Test 合格証書正本（提交申請時須已持有）"
+    );
+  } else if(p.lifetest==="age_exempt"){
+    lifeItems.push("出生証明書（証明年齡65歲或以上，用於申請豁免 Life in the UK Test）");
+  } else if(p.lifetest==="disability_exempt"){
+    lifeItems.push("醫生或專科醫生出具的長期病患/殘疾証明書","相關醫療報告（支持豁免申請）");
+  }
+  S.push({title:"英國生活知識測試",icon:"📖",
+    note:p.lifetest==="not_yet"?"⚠️ 尚未應考：必須在提交申請前通過，請盡早安排":p.lifetest==="age_exempt"?"65歲或以上可豁免此測試":p.lifetest==="disability_exempt"?"長期病患或殘疾可申請醫療豁免":undefined,
+    items:lifeItems});
+
+  /* 7. Family members - only if applicable */
+  if(["with_partner","with_all"].includes(p.family)){
+    S.push({title:"配偶/伴侶申請文件",icon:"👫",
+      note:"配偶/伴侶須各自提交獨立申請（費用 £3,029），毋需証明與主申請人的關係，但申請表中須填寫主申請人的申請詳情",
+      items:[
+        "配偶/伴侶的 BNO 依親簽証（BNO Dependant Visa）証明",
+        "結婚証書 或 民事伴侶証書（附核實副本）",
+        "配偶/伴侶在英居住的相關文件（同上述居英証明類別）",
+        "填寫主申請人的 ILR 申請參考號碼",
+    ]});
+  }
+  if(["with_children","with_all"].includes(p.family)){
+    S.push({title:"18歲以下子女申請文件",icon:"👨‍👩‍👧",
+      note:"每位子女須各自提交獨立申請（費用 £3,029），並連結至父母的申請",
+      items:[
+        "子女的 BNO 依親簽証（BNO Dependant Visa）証明",
+        "子女出生証明書（附核實副本）",
+        "子女護照（BNO 及/或 香港特區護照）",
+        "子女在英就讀學校的在學証明書（輔助証明居英）",
+        "如父母其中一方尚未完成 ILR 申請：需提供雙方父母申請資料",
+        "填寫主申請人（父/母）的 ILR 申請參考號碼",
+    ]});
+  }
+  if(p.family==="adult_dependent"){
+    S.push({title:"成年依親申請文件",icon:"👴",
+      note:"成年依親（父母/祖父母/兄弟姊妹等）可獨立申請，毋需同時提交或証明關係",
+      items:[
+        "成年依親人士的 BNO 依親簽証証明",
+        "証明與主申請人關係的文件（如：出生証明書）",
+        "主申請人的 ILR 申請詳情或已獲 ILR 的証明",
+    ]});
+  }
+
+  /* 8. Application procedure */
+  const appItems=[
+    "在網上 UKVI 申請系統提交申請，選擇「BNO」類別（連結：visas-immigration.service.gov.uk）",
+    "繳付申請費 £3,029（每人獨立繳付）",
+    "生物特徵登記（指紋及照片）：到 UKVCAS 服務點辦理（已包含在申請費內，毋需另付）",
+    "或使用 UK Immigration: ID Check App 完成身份核實（如護照兼容）",
+    "申請確認電郵及參考號碼（妥善保存，家庭成員申請時需要此號碼）",
+    "申請成功後將獲發 eVisa（電子居留身份紀錄），需建立 UKVI 帳戶存取",
+  ];
+  if(p.family!=="solo"){
+    appItems.push("家庭成員各自提交獨立申請表，填入主申請人的申請參考號碼以連結申請");
+  }
+  appItems.push("如選擇快速審批：Priority 服務（約5個工作天，+£500）或 Super Priority（次工作天，+£1,000）");
+  S.push({title:"申請程序及費用",icon:"📋",
+    note:"⚠️ 重要：提交申請後，在收到決定前不得離開英國、愛爾蘭、海峽群島或曼島，否則申請將自動撤銷。預計標準審批時間約6個月。",
+    items:appItems});
+
+  return S;
+}
+
+function getKeys(p){return getSections(p).flatMap((s,si)=>s.items.map((_,ii)=>`${p.id}-${si}-${ii}`));}
+
+/* ══ RENDER CHECKLIST ══ */
+function renderCL(){
+  const p=state.profiles.find(x=>x.id===state.activeP);
+  if(!p){G("cl-body").innerHTML=`<div style="text-align:center;padding:36px 20px;color:#a89fbc;font-size:14px;line-height:1.9"><div style="font-size:36px;margin-bottom:10px">📋</div>請先前往「我的檔案」<br>建立或選擇一個檔案</div>`;G("cl-cd").innerHTML="";G("cl-tag").textContent="";return;}
+  if(!p.checked)p.checked={};
+
+  // Countdown banner
+  const dt=calcDates(p.visaDate);const now=new Date();now.setHours(0,0,0,0);
+  const days=Math.max(0,Math.round((dt.earliest-now)/86400000));const ok=now>=dt.earliest;
+  const cd=G("cl-cd");
+  cd.style.background=ok?"rgba(76,175,122,.13)":"rgba(201,151,58,.11)";
+  cd.style.border=`1.5px solid ${ok?"rgba(76,175,122,.5)":"rgba(201,151,58,.5)"}`;
+  cd.innerHTML=`<div style="font-size:28px">${ok?"✅":"⏳"}</div>
+    <div><div style="font-size:11px;color:#c9973a;font-weight:bold;letter-spacing:1px;margin-bottom:2px">最早可提交 ILR 申請日期</div>
+    <div style="font-size:17px;color:#fff;font-weight:bold">${fmtL(toISO(dt.earliest))}</div>
+    <div style="font-size:12px;color:#a89fbc;margin-top:4px;line-height:1.5">
+      ${ok?"已達申請資格！請聯絡律師盡快提交 ILR 申請。":`距今還有 <strong style="color:#c9973a">${days} 日</strong>（五年屆滿前28天可提早申請）`}
+    </div></div>`;
+
+  G("cl-tag").textContent=`${p.name} 的 ILR 文件清單`;
+  const secs=getSections(p);
+  const ak=secs.flatMap((s,si)=>s.items.map((_,ii)=>`${p.id}-${si}-${ii}`));
+  const dn=ak.filter(k=>p.checked[k]).length;const pct=ak.length?Math.round(dn/ak.length*100):0;
+  const bar=G("cl-bar");bar.style.width=pct+"%";
+  bar.style.background=pct===100?"linear-gradient(90deg,#4caf7a,#6dd89a)":"linear-gradient(90deg,#c9973a,#e8c060)";
+  G("cl-pct").textContent=pct+"%";G("cl-pct").style.color=pct===100?"#4caf7a":"#c9973a";
+  G("cl-alldone").style.display=pct===100?"block":"none";
+
+  const isPlum=["retired","not_working"].includes(p.employment);
+  const cBg=isPlum?"#1e0f30":"#112238";const sBg=isPlum?"#261540":"#162d4a";
+
+  let html="";
+  secs.forEach((sec,si)=>{
+    const sk=sec.items.map((_,ii)=>`${p.id}-${si}-${ii}`);
+    const sd=sk.filter(k=>p.checked[k]).length;const ad=sd===sk.length;
+    html+=`<div class="sec-card" style="background:${cBg};border:1.5px solid ${ad?"rgba(201,151,58,.6)":"rgba(255,255,255,.07)"}">
+      <div style="background:${sBg};padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:11px;flex:1">
+          <span style="font-size:20px">${sec.icon}</span>
+          <div style="flex:1">
+            <div style="font-weight:bold;font-size:15px;color:#fff">${sec.title}</div>
+            ${sec.note?`<div style="font-size:11px;color:#c9973a;margin-top:4px;line-height:1.5">⚠️ ${sec.note}</div>`:""}
+          </div>
+        </div>
+        <div style="font-size:12px;font-weight:bold;flex-shrink:0;margin-left:9px;color:${ad?"#c9973a":"#a89fbc"}">${ad?"✓ 完成":`${sd}/${sk.length}`}</div>
+      </div>`;
+    sec.items.forEach((item,ii)=>{
+      const k=`${p.id}-${si}-${ii}`;const isC=!!p.checked[k];
+      html+=`<div class="row" style="background:${isC?"rgba(201,151,58,.07)":"transparent"}" onclick="tgl('${p.id}','${k}')">
+        <div class="chkbox${isC?" on":""}">
+          ${isC?`<svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1.5 6L6 10.5L14.5 1.5" stroke="#1a0e00" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`:""}
+        </div>
+        <div class="lbl${isC?" done":""}">${item}</div>
+      </div>`;
+    });
+    html+="</div>";
+  });
+
+  // Footer notes
+  html+=`<div style="background:rgba(201,151,58,.07);border:1.5px solid rgba(201,151,58,.2);border-radius:16px;padding:16px;font-size:13.5px;color:#c8baa0;line-height:1.85;margin-bottom:8px">
+    <div style="font-weight:bold;color:#c9973a;margin-bottom:10px;font-size:15px">⚖️ ILR 重要提示（2026年3月核實）</div>
+    <div style="margin-bottom:10px">📌 <strong style="color:#e8e2f0">申請資格：</strong>持有 BNO 簽証，並在英國合法連續居住5年（符合180天離境規定）。最近一次有效簽証必須為 BNO 簽証。</div>
+    <div style="margin-bottom:10px">📌 <strong style="color:#e8e2f0">申請後不得出境：</strong>提交 ILR 申請後至收到決定前，不得離開英國、愛爾蘭、海峽群島或曼島，否則申請將<strong style="color:#e05c5c">自動撤銷</strong>（不退費）。</div>
+    <div style="margin-bottom:10px">📌 <strong style="color:#e8e2f0">學生簽証不計入：</strong>在英期間若曾持有 Student Visa / Tier 4，該段時間<strong style="color:#e05c5c">不計入</strong>5年居英年期。在 BNO 簽証下就讀則可計入。</div>
+    <div style="margin-bottom:10px">📌 <strong style="color:#e8e2f0">「Earned Settlement」政策：</strong>英國政府已確認 BNO 持有人<strong style="color:#c9973a">維持5年永居資格</strong>，改革尚未立法，現行規則繼續適用。</div>
+    <div style="margin-bottom:10px">📌 <strong style="color:#e8e2f0">ILR 申請費（2025年4月更新）：</strong>每人 £3,029，生物特徵登記費已包含在內，毋需另付。ILR 申請<strong style="color:#4caf7a">毋需繳付</strong>醫療附加費（Immigration Health Surcharge）。</div>
+    <div>此清單僅供參考，提交前請務必向持牌移民律師或顧問確認最新要求。</div>
+  </div>`;
+  G("cl-body").innerHTML=html;saveS();
+}
+
+function tgl(pid,k){
+  const p=state.profiles.find(x=>x.id===pid);if(!p)return;
+  if(!p.checked)p.checked={};p.checked[k]=!p.checked[k];saveS();renderCL();
+}
+function resetCL(){
+  if(!confirm("確認重設所有剔選？此操作不可復原。"))return;
+  const p=state.profiles.find(x=>x.id===state.activeP);
+  if(p){p.checked={};saveS();renderCL();toast("已重設所有剔選 🔄");}
+}
+
+/* ══ CALCULATOR ══ */
+function renderCalcTabs(){
+  const c=G("calc-tabs");
+  if(!state.profiles.length){c.innerHTML=`<div style="text-align:center;padding:16px;color:#a89fbc;font-size:14px">請先在「我的檔案」建立檔案</div>`;G("calc-dates").innerHTML="";return;}
+  if(!calcP||!state.profiles.find(x=>x.id===calcP))calcP=state.profiles[0].id;
+  c.innerHTML=state.profiles.map(p=>{const isA=calcP===p.id;
+    return `<button onclick="swCP('${p.id}')" style="text-align:left;padding:12px 14px;border-radius:12px;border:1.5px solid ${isA?"rgba(201,151,58,.6)":"rgba(255,255,255,.12)"};background:${isA?"rgba(201,151,58,.1)":"rgba(255,255,255,.04)"};color:${isA?"#c9973a":"#c8bfd8"};font-size:14px;font-weight:${isA?"bold":"normal"};width:100%;margin-bottom:6px">
+      ${p.name} ${isA?"▼":"›"}</button>`;
+  }).join("");
+  updCalcDates();renderTrips();updStats();
+}
+function swCP(id){calcP=id;pendDel=null;renderCalcTabs();}
+function updCalcDates(){
+  const p=state.profiles.find(x=>x.id===calcP);if(!p){G("calc-dates").innerHTML="";return;}
+  const dt=calcDates(p.visaDate);const now=new Date();now.setHours(0,0,0,0);
+  const days=Math.max(0,Math.round((dt.earliest-now)/86400000));const ok=now>=dt.earliest;
+  G("calc-dates").innerHTML=`
+    <div style="font-size:13px;color:#c9973a;font-weight:bold;margin-bottom:10px">📅 ${p.name} 的申請日期</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:10px">
+      <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:10px;color:#a89fbc;margin-bottom:3px">簽証批核日</div>
+        <div style="font-size:12px;font-weight:bold;color:#e8e2f0">${fmtS(p.visaDate)}</div>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:10px;color:#a89fbc;margin-bottom:3px">五年屆滿日</div>
+        <div style="font-size:12px;font-weight:bold;color:#e8e2f0">${fmtS(toISO(dt.fiveYr))}</div>
+      </div>
+      <div style="background:rgba(201,151,58,.12);border:1px solid rgba(201,151,58,.35);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:10px;color:#c9973a;margin-bottom:3px">最早申請日</div>
+        <div style="font-size:12px;font-weight:bold;color:#c9973a">${fmtS(toISO(dt.earliest))}</div>
+      </div>
+    </div>
+    <div style="background:${ok?"rgba(76,175,122,.12)":"rgba(201,151,58,.1)"};border:1px solid ${ok?"rgba(76,175,122,.4)":"rgba(201,151,58,.38)"};border-radius:10px;padding:10px 13px;text-align:center;font-size:13px;font-weight:bold;color:${ok?"#4caf7a":"#c9973a"}">
+      ${ok?"✅ 已可提交 ILR 申請！請聯絡律師安排。":"⏳ 距最早申請日還有 "+days+" 日"}</div>`;
+}
+function showTripForm(){G("add-trip-btn").style.display="none";G("trip-form").style.display="block";}
+function cancelTrip(){G("add-trip-btn").style.display="block";G("trip-form").style.display="none";}
+function prevTrip(){
+  const dep=V("f-dep"),ret=V("f-ret"),pv=G("f-prev");
+  if(dep&&ret&&new Date(ret)>new Date(dep)){pv.style.display="block";pv.innerHTML=`📅 境外天數：<strong>${dB(dep,ret)} 日</strong>（${fmtL(dep)} 至 ${fmtL(ret)}）`;}
+  else pv.style.display="none";
+}
+function saveTrip(){
+  const dep=V("f-dep"),ret=V("f-ret"),dest=G("f-dest").value.trim();
+  const err=G("f-err");err.style.display="none";
+  const p=state.profiles.find(x=>x.id===calcP);
+  if(!dep||!ret){err.textContent="⚠️ 請填寫出發及返回日期。";err.style.display="block";return;}
+  if(new Date(ret)<=new Date(dep)){err.textContent="⚠️ 返回日期必須晚於出發日期。";err.style.display="block";return;}
+  if(p&&new Date(dep)<new Date(p.visaDate)){err.textContent=`⚠️ 出發日期不可早於簽証批核日（${fmtL(p.visaDate)}）。`;err.style.display="block";return;}
+  if(!state.trips)state.trips={};if(!state.trips[calcP])state.trips[calcP]=[];
+  state.trips[calcP].push({id:Date.now(),destination:dest,departure:dep,return:ret});
+  state.trips[calcP].sort((a,b)=>new Date(a.departure)-new Date(b.departure));
+  saveS();G("f-dest").value="";G("f-dep").value="";G("f-ret").value="";G("f-prev").style.display="none";
+  cancelTrip();renderTrips();updStats();toast("離境紀錄已儲存 ✅");
+}
+function cDel(id){pendDel=id;renderTrips();}
+function xDel(){pendDel=null;renderTrips();}
+function doDel(id){
+  if(!state.trips||!state.trips[calcP])return;
+  state.trips[calcP]=state.trips[calcP].filter(t=>t.id!==id);
+  saveS();pendDel=null;renderTrips();updStats();toast("紀錄已刪除 🗑️");
+}
+function renderTrips(){
+  const list=(state.trips||{})[calcP]||[];const el=G("trip-list");
+  if(!list.length){el.innerHTML=`<div style="text-align:center;padding:36px 20px;color:#a89fbc;font-size:14px;line-height:1.9"><div style="font-size:36px;margin-bottom:10px">✈️</div>尚未新增任何離境紀錄<br><span style="font-size:12px">點擊上方按鈕開始記錄</span></div>`;return;}
+  const tot=list.reduce((a,t)=>a+dB(t.departure,t.return),0);
+  let html=`<div style="font-size:13px;color:#a89fbc;margin-bottom:10px">離境紀錄（共 ${list.length} 次 · 合計 ${tot} 日）</div>`;
+  list.forEach(t=>{
+    const n=dB(t.departure,t.return),c=pendDel===t.id;
+    html+=`<div style="margin-bottom:9px">
+      <div class="trip-card" style="border-bottom-left-radius:${c?"0":"15px"};border-bottom-right-radius:${c?"0":"15px"}">
+        <div style="width:40px;height:40px;border-radius:11px;background:rgba(201,151,58,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">✈️</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:bold;font-size:14px;color:#f0ece4">${t.destination||"（目的地未填寫）"}</div>
+          <div style="font-size:12px;color:#a89fbc;margin-top:3px;line-height:1.5">${fmtL(t.departure)}<br>→ ${fmtL(t.return)}</div>
+        </div>
+        <div style="text-align:center;flex-shrink:0;margin:0 5px"><div style="font-size:20px;font-weight:bold;color:#c9973a">${n}</div><div style="font-size:11px;color:#a89fbc">日</div></div>
+        <button onclick="cDel(${t.id})" style="background:rgba(224,92,92,.14);border:1.5px solid rgba(224,92,92,.38);border-radius:11px;padding:10px 12px;color:#e05c5c;font-size:13px;flex-shrink:0">刪除</button>
+      </div>
+      <div class="del-panel${c?" show":""}">
+        <div style="flex:1;font-size:14px;color:#f0ece4">確認刪除此紀錄？</div>
+        <button onclick="doDel(${t.id})" style="background:#e05c5c;border-radius:10px;padding:10px 14px;color:#fff;font-weight:bold;font-size:13px">確認</button>
+        <button onclick="xDel()" style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;color:#c8bfd8;font-size:13px">取消</button>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+function updStats(){
+  const list=(state.trips||{})[calcP]||[];
+  const total=list.reduce((a,t)=>a+dB(t.departure,t.return),0);
+  const roll=rolMax(list);const tc=col(total),rc=col(roll);
+  G("st-total").style.borderColor=`${tc}50`;
+  G("st-total").innerHTML=`<div style="font-size:11px;color:#a89fbc;margin-bottom:7px;line-height:1.4">五年總離境天數</div>
+    <div style="font-size:27px;font-weight:bold;color:${tc};line-height:1">${total}<span style="font-size:13px;margin-left:3px">日</span></div>
+    <div style="font-size:11px;color:#a89fbc;margin-top:7px;line-height:1.4">上限180日・剩餘${Math.max(0,180-total)}日</div>
+    <div style="height:4px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:9px">
+      <div style="height:100%;border-radius:99px;background:${tc};width:${Math.min(100,total/180*100)}%;transition:width .4s"></div></div>`;
+  G("st-roll").style.borderColor=`${rc}50`;
+  G("st-roll").innerHTML=`<div style="font-size:11px;color:#a89fbc;margin-bottom:7px;line-height:1.4">最高滾動12個月</div>
+    <div style="font-size:27px;font-weight:bold;color:${rc};line-height:1">${roll}<span style="font-size:13px;margin-left:3px">日</span></div>
+    <div style="font-size:11px;color:#a89fbc;margin-top:7px;line-height:1.4">剩餘${Math.max(0,180-roll)}日</div>
+    <div style="height:4px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:9px">
+      <div style="height:100%;border-radius:99px;background:${rc};width:${Math.min(100,roll/180*100)}%;transition:width .4s"></div></div>`;
+  const al=G("st-alert");if(!list.length){al.style.display="none";return;}al.style.display="block";
+  const over=total>180||roll>180,near=!over&&(total>150||roll>150);
+  al.style.background=over?"rgba(224,92,92,.13)":near?"rgba(224,160,48,.13)":"rgba(76,175,122,.1)";
+  al.style.border=`1.5px solid ${over?"rgba(224,92,92,.5)":near?"rgba(224,160,48,.5)":"rgba(76,175,122,.5)"}`;
+  al.innerHTML=over?`🚨 <strong style="color:#e05c5c">超出上限：</strong>離境天數已超過 180 天，將嚴重影響 ILR 申請資格，請立即聯絡律師評估情況。`
+    :near?`⚠️ <strong style="color:#e0a030">接近上限：</strong>離境天數已超過 150 天，請謹慎安排餘下旅遊計劃，避免超出 180 天上限。`
+    :`✅ <strong style="color:#4caf7a">符合規定：</strong>目前離境天數在規定範圍內，請繼續保持。`;
+}
+
+/* ══ SCREEN ══ */
+const PGTTLS={welcome:"BNO 永居申請助手",setup:"建立申請檔案",profiles:"我的檔案",checklist:"ILR 文件清單",calculator:"離境天數計算"};
+function switchScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  G("screen-"+id)?.classList.add("active");G("pgTitle").textContent=PGTTLS[id]||"";
+  const nav=["profiles","checklist","calculator"].includes(id);
+  G("bot-nav").style.display=nav?"flex":"none";
+  ["profiles","checklist","calculator"].forEach(n=>G("nav-"+n)?.classList.toggle("on",n===id));
+  const bg=id==="calculator"?"#0c1624":"#0b1d2e";document.body.style.background=bg;G("hdr").style.background=bg;
+  if(id==="profiles")renderProfilesList();if(id==="checklist")renderCL();if(id==="calculator")renderCalcTabs();
+  if(id==="welcome"&&state.profiles.length)G("skip-btn").style.display="block";
+  state.scr=id;saveS();
+}
+
+/* ══ HELPERS ══ */
+const dB=(a,b)=>Math.max(0,Math.round((new Date(b)-new Date(a))/86400000));
+const fmtL=d=>{if(!d)return"—";return new Date(d).toLocaleDateString("zh-HK",{year:"numeric",month:"long",day:"numeric"})};
+const fmtS=d=>{if(!d)return"—";return new Date(d).toLocaleDateString("zh-HK",{year:"numeric",month:"short",day:"numeric"})};
+const toISO=d=>d.toISOString().split("T")[0];
+const col=v=>v>180?"#e05c5c":v>150?"#e0a030":"#4caf7a";
+const addD=(s,n)=>{const d=new Date(s);d.setDate(d.getDate()+n);return d;};
+const addY=(s,n)=>{const d=new Date(s);d.setFullYear(d.getFullYear()+n);return d;};
+function calcDates(vs){const s=vs||"2021-09-01";const f=addY(s,5);const e=addD(toISO(f),-28);return{fiveYr:f,earliest:e};}
+function rolMax(ts){if(!ts.length)return 0;const s=[...ts].sort((a,b)=>new Date(a.departure)-new Date(b.departure));let max=0;
+  for(const t of s){const ws=new Date(t.departure),we=new Date(ws);we.setFullYear(we.getFullYear()+1);let tot=0;
+    for(const x of s){const d=new Date(x.departure),r=new Date(x.return);if(d>=we||r<=ws)continue;tot+=Math.round((Math.min(r,we)-Math.max(d,ws))/86400000);}
+    if(tot>max)max=tot;}return max;}
+function toast(msg){const e=document.createElement("div");e.className="toast";e.textContent=msg;G("toasts").appendChild(e);setTimeout(()=>e.remove(),2800);}
+
+/* ══ INIT ══ */
+(function(){
+  const s=state.scr||"welcome";
+  if(!state.profiles.length||s==="welcome"||s==="setup"){switchScreen("welcome");}
+  else{G("bot-nav").style.display="flex";switchScreen(["profiles","checklist","calculator"].includes(s)?s:"profiles");}
+  if(state.profiles.length)G("skip-btn").style.display="block";
+})();
+</script>
+</body>
+</html>
